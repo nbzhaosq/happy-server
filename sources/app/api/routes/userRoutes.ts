@@ -79,7 +79,6 @@ export async function userRoutes(app: Fastify) {
             where: {
                 username: {
                     startsWith: query,
-                    mode: 'insensitive'
                 }
             },
             include: {

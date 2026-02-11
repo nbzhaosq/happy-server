@@ -21,6 +21,8 @@ import { enableAuthentication } from "./utils/enableAuthentication";
 import { userRoutes } from "./routes/userRoutes";
 import { feedRoutes } from "./routes/feedRoutes";
 import { kvRoutes } from "./routes/kvRoutes";
+import { getUploadDir } from "@/storage/files";
+import path from "path";
 
 export async function startApi() {
 
@@ -36,6 +38,10 @@ export async function startApi() {
         origin: '*',
         allowedHeaders: '*',
         methods: ['GET', 'POST', 'DELETE']
+    });
+    app.register(import('@fastify/static'), {
+        root: path.resolve(getUploadDir()),
+        prefix: '/uploads/',
     });
     app.get('/', function (request, reply) {
         reply.send('Welcome to Happy Server!');
@@ -67,7 +73,7 @@ export async function startApi() {
     feedRoutes(typed);
     kvRoutes(typed);
 
-    // Start HTTP 
+    // Start HTTP
     const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3005;
     await app.listen({ port, host: '0.0.0.0' });
     onShutdown('api', async () => {

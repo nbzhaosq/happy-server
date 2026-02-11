@@ -1,29 +1,30 @@
-import * as Minio from 'minio';
+import * as fs from 'fs/promises';
+import * as path from 'path';
 
-const s3Host = process.env.S3_HOST!;
-const s3Port = process.env.S3_PORT ? parseInt(process.env.S3_PORT, 10) : undefined;
-const s3UseSSL = process.env.S3_USE_SSL ? process.env.S3_USE_SSL === 'true' : true;
+const UPLOAD_DIR = process.env.UPLOAD_DIR || './uploads';
 
-export const s3client = new Minio.Client({
-    endPoint: s3Host,
-    port: s3Port,
-    useSSL: s3UseSSL,
-    accessKey: process.env.S3_ACCESS_KEY!,
-    secretKey: process.env.S3_SECRET_KEY!,
-});
+export function getUploadDir() {
+    return UPLOAD_DIR;
+}
 
-export const s3bucket = process.env.S3_BUCKET!;
+export async function putObject(key: string, data: any) {
+    const fullPath = path.join(UPLOAD_DIR, key);
+    await fs.mkdir(path.dirname(fullPath), { recursive: true });
+    await fs.writeFile(fullPath, data);
+}
 
-export const s3host = process.env.S3_HOST!
+export async function getObject(key: string) {
+    const fullPath = path.join(UPLOAD_DIR, key);
+    return fs.readFile(fullPath);
+}
 
-export const s3public = process.env.S3_PUBLIC_URL!;
-
-export async function loadFiles() {
-    await s3client.bucketExists(s3bucket); // Throws if bucket does not exist or is not accessible
+export async function deleteObject(key: string) {
+    const fullPath = path.join(UPLOAD_DIR, key);
+    await fs.unlink(fullPath);
 }
 
 export function getPublicUrl(path: string) {
-    return `${s3public}/${path}`;
+    return `/uploads/${path}`;
 }
 
 export type ImageRef = {

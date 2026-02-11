@@ -1,9 +1,9 @@
 import { randomKey } from "@/utils/randomKey";
 import { processImage } from "./processImage";
-import { s3bucket, s3client, s3host } from "./files";
+import { putObject, getPublicUrl } from "./files";
 import { db } from "./db";
 
-export async function uploadImage(userId: string, directory: string, prefix: string, url: string, src: Buffer) {
+export async function uploadImage(userId: string, directory: string, prefix: string, url: string, src: any) {
 
     // Check if image already exists
     const existing = await db.uploadedFile.findFirst({
@@ -25,7 +25,7 @@ export async function uploadImage(userId: string, directory: string, prefix: str
     const processed = await processImage(src);
     const key = randomKey(prefix);
     let filename = `${key}.${processed.format === 'png' ? 'png' : 'jpg'}`;
-    await s3client.putObject(s3bucket, 'public/users/' + userId + '/' + directory + '/' + filename, src);
+    await putObject('public/users/' + userId + '/' + directory + '/' + filename, src);
     await db.uploadedFile.create({
         data: {
             accountId: userId,
@@ -45,5 +45,5 @@ export async function uploadImage(userId: string, directory: string, prefix: str
 }
 
 export function resolveImageUrl(path: string) {
-    return `https://${s3host}/${s3bucket}/${path}`;
+    return getPublicUrl(path);
 }

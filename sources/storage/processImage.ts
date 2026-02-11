@@ -1,7 +1,7 @@
 import sharp from "sharp";
 import { thumbhash } from "./thumbhash";
 
-export async function processImage(src: Buffer) {
+export async function processImage(src: Uint8Array | Buffer) {
 
     // Read image
     let meta = await sharp(src).metadata();
